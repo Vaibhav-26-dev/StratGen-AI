@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StratGen AI - Business Strategy Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      body { font-family: 'Inter', sans-serif; }
+      /* Custom scrollbar for dark theme */
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: #09090b; }
+      ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+      /* Hide scrollbar utility */
+      .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+      }
+      .scrollbar-hide {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+      }
+
+      /* Accessibility: Font Scaling */
+      html.font-normal { font-size: 100%; }
+      html.font-large { font-size: 115%; }
+      html.font-xl { font-size: 130%; }
+
+      /* Accessibility: Screen Reader Only */
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+      }
+
+      /* Accessibility: Light Mode */
+      body.light-mode {
+          background-color: #f8fafc !important; 
+          color: #0f172a !important; 
+      }
+
+      body.light-mode .bg-black,
+      body.light-mode .bg-zinc-950,
+      body.light-mode .bg-zinc-900 {
+          background-color: #ffffff !important;
+          border-color: #cbd5e1 !important; 
+          color: #0f172a !important;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      }
+
+      body.light-mode .bg-zinc-800 {
+          background-color: #f1f5f9 !important; 
+          border-color: #cbd5e1 !important;
+          color: #1e293b !important;
+      }
+
+      body.light-mode .text-white { color: #0f172a !important; }
+      body.light-mode .text-zinc-200 { color: #1e293b !important; }
+      body.light-mode .text-zinc-300 { color: #334155 !important; }
+      body.light-mode .text-zinc-400 { color: #475569 !important; }
+      body.light-mode .text-zinc-500 { color: #64748b !important; }
+      
+      /* Inputs in Light Mode */
+      body.light-mode input,
+      body.light-mode textarea,
+      body.light-mode select {
+          background-color: #ffffff !important;
+          border-color: #cbd5e1 !important;
+          color: #0f172a !important;
+      }
+      
+      body.light-mode .bg-black\/50 {
+         background-color: rgba(255, 255, 255, 0.8) !important;
+      }
+
+      /* Accessibility: High Contrast Mode (Overrides Light Mode) */
+      body.high-contrast {
+          background-color: #000000 !important;
+          color: #ffffff !important;
+      }
+      
+      body.high-contrast .bg-zinc-900, 
+      body.high-contrast .bg-zinc-950, 
+      body.high-contrast .bg-black,
+      body.high-contrast .bg-zinc-800,
+      body.high-contrast input, 
+      body.high-contrast textarea, 
+      body.high-contrast select {
+          background-color: #000000 !important;
+          border-color: #ffffff !important;
+          border-width: 1px;
+          color: #ffffff !important;
+          box-shadow: none !important;
+      }
+
+      body.high-contrast .text-zinc-300,
+      body.high-contrast .text-zinc-400,
+      body.high-contrast .text-zinc-500 {
+          color: #ffff00 !important; 
+      }
+
+      body.high-contrast .text-white {
+          color: #ffffff !important;
+      }
+
+      body.high-contrast button {
+          border: 2px solid #ffff00 !important;
+          background-color: #000000 !important;
+          color: #ffff00 !important;
+          font-weight: 700;
+          text-decoration: underline;
+      }
+      
+      body.high-contrast button:hover,
+      body.high-contrast button:focus {
+          background-color: #333300 !important;
+          outline: 2px solid #ffffff !important;
+      }
+      
+      body.high-contrast .bg-yellow-500 {
+          background-color: #ffff00 !important;
+          color: #000000 !important;
+          border: 2px solid #ffffff !important;
+      }
+      
+      body.high-contrast .text-yellow-500 {
+          color: #ffff00 !important;
+      }
+
+      body.high-contrast *:focus-visible {
+          outline: 3px solid #00ff00 !important;
+          outline-offset: 2px;
+      }
+
+      /* Print Styles for PDF Export */
+      @media print {
+        @page { 
+          size: A4;
+          margin: 20mm; 
+        }
+        
+        body, body.light-mode, body.high-contrast { 
+          background-color: white !important; 
+          color: #1f2937 !important; 
+          font-family: 'Georgia', 'Times New Roman', serif; /* Professional serif for reports */
+          -webkit-print-color-adjust: exact; 
+          print-color-adjust: exact;
+        }
+
+        /* Headings stay sans-serif for contrast */
+        h1, h2, h3, h4, h5, h6 {
+          font-family: 'Inter', sans-serif !important;
+        }
+
+        #root { width: 100%; }
+
+        /* Reset dark mode backgrounds to white */
+        .bg-black, .bg-zinc-900, .bg-zinc-950, .bg-zinc-800 { 
+          background-color: white !important; 
+          color: black !important; 
+          border-color: #e5e7eb !important; 
+          box-shadow: none !important;
+        }
+
+        /* Reset text colors for high contrast on paper */
+        .text-white, .text-zinc-300, .text-zinc-400, .text-zinc-500 { 
+          color: #374151 !important; 
+        }
+        
+        /* Keep accents readable but professional */
+        .text-yellow-500 { color: #b45309 !important; }
+        .bg-yellow-500 { background-color: #f59e0b !important; color: black !important; }
+        .border-yellow-500 { border-color: #f59e0b !important; }
+
+        /* Hide interactive elements and navigation */
+        .no-print, button, header, .scrollbar-hide { display: none !important; }
+        
+        /* Layout adjustments for linear document flow */
+        .grid { display: block !important; }
+        .grid > div { 
+          margin-bottom: 24px; 
+          page-break-inside: avoid; 
+          border: 1px solid #e5e7eb;
+          box-shadow: none !important;
+        }
+        
+        /* Chart adjustments */
+        .recharts-responsive-container { 
+          /* height removed to respect inline styles for aspect ratio */
+          width: 100% !important; 
+          page-break-inside: avoid;
+        }
+        
+        /* Explicit page breaks */
+        .page-break { 
+          page-break-before: always !important; 
+          break-before: page;
+          margin-top: 2rem;
+        }
+        
+        /* Cover Page Specifics */
+        .print-cover-page {
+          height: 95vh; /* Almost full page height */
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          page-break-after: always;
+          text-align: center;
+        }
+
+        /* Typography tweaks for print */
+        p { line-height: 1.6; }
+        h2 { border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "recharts": "https://esm.sh/recharts@^3.5.1",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-black text-white antialiased selection:bg-yellow-500 selection:text-black transition-colors duration-200">
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "StratGen AI",
+  "description": "A professional AI Business Strategy Generator that creates comprehensive business models, marketing plans, SWOT analyses, and growth roadmaps based on industry and budget.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera",
+    "geolocation"
+  ]
+}

@@ -1,0 +1,155 @@
+import React, { useState, useEffect } from 'react';
+import { generateStrategy } from './services/geminiService';
+import InputForm from './components/InputForm';
+import StrategyDashboard from './components/StrategyDashboard';
+import AccessibilityControls from './components/AccessibilityControls';
+import { BusinessStrategy, UserInput } from './types';
+import { BarChart3, Info, Accessibility } from 'lucide-react';
+
+function App() {
+  const [strategy, setStrategy] = useState<BusinessStrategy | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Accessibility State
+  const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xl'>('normal');
+  const [highContrast, setHighContrast] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [showA11yMenu, setShowA11yMenu] = useState(false);
+
+  // Apply Accessibility Classes
+  useEffect(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    
+    // Font Size
+    root.classList.remove('font-normal', 'font-large', 'font-xl');
+    root.classList.add(`font-${fontSize}`);
+    
+    // Light/Dark Theme
+    if (theme === 'light') {
+        body.classList.add('light-mode');
+    } else {
+        body.classList.remove('light-mode');
+    }
+    
+    // High Contrast (Overrides Theme)
+    if (highContrast) {
+        body.classList.add('high-contrast');
+    } else {
+        body.classList.remove('high-contrast');
+    }
+  }, [fontSize, highContrast, theme]);
+
+  const handleGenerate = async (input: UserInput) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await generateStrategy(input);
+      setStrategy(result);
+    } catch (err) {
+      setError("Failed to generate strategy. Please try again or check your API key.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const reset = () => {
+    setStrategy(null);
+    setError(null);
+  };
+
+  return (
+    <div className="min-h-screen bg-black flex flex-col transition-all duration-200">
+      {/* Header */}
+      <header className="bg-black/50 backdrop-blur-md border-b border-zinc-800 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div 
+            className="flex items-center gap-2 cursor-pointer group focus-visible:ring-2 focus-visible:ring-yellow-500 rounded-lg p-1" 
+            onClick={reset}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && reset()}
+            aria-label="StratGen AI Home - Reset Application"
+          >
+            <div className="bg-yellow-500 p-2 rounded-lg group-hover:bg-yellow-400 transition-colors">
+              <BarChart3 className="w-6 h-6 text-black" aria-hidden="true" />
+            </div>
+            <h1 className="text-xl font-bold text-white tracking-tight">
+              StratGen <span className="text-yellow-500">AI</span>
+            </h1>
+          </div>
+          
+          <div className="relative">
+              <button 
+                onClick={() => setShowA11yMenu(!showA11yMenu)}
+                className={`p-2 rounded-xl transition-all border ${showA11yMenu ? 'bg-yellow-500 text-black border-yellow-500' : 'bg-zinc-900 text-zinc-400 border-zinc-700 hover:text-white'}`}
+                aria-label="Accessibility Settings"
+                aria-expanded={showA11yMenu}
+                aria-haspopup="dialog"
+              >
+                  <Accessibility className="w-5 h-5" />
+              </button>
+              
+              <AccessibilityControls 
+                fontSize={fontSize}
+                setFontSize={setFontSize}
+                highContrast={highContrast}
+                setHighContrast={setHighContrast}
+                theme={theme}
+                setTheme={setTheme}
+                isOpen={showA11yMenu}
+                onClose={() => setShowA11yMenu(false)}
+              />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-grow p-4 md:p-8" id="main-content">
+        {!strategy ? (
+          <div className="flex flex-col items-center justify-center min-h-[80vh] animate-in fade-in duration-500">
+            <div className="text-center mb-10 max-w-3xl mx-auto">
+              <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">
+                Turn your idea into a <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 high-contrast:text-yellow-500 high-contrast:bg-none">
+                  Business Powerhouse
+                </span>
+              </h1>
+              <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+                Strategic insights, marketing roadmaps, and risk analysis generated by advanced AI.
+                Designed for speed and precision.
+              </p>
+            </div>
+            
+            <InputForm onSubmit={handleGenerate} isLoading={loading} />
+
+            {error && (
+              <div role="alert" className="mt-8 bg-red-950/30 text-red-400 px-6 py-4 rounded-xl border border-red-900/50 flex items-center gap-3 shadow-lg">
+                <Info className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                <span className="font-medium">{error}</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <StrategyDashboard strategy={strategy} onReset={reset} />
+        )}
+      </main>
+
+      {/* Disclaimer Footer */}
+      <footer className="border-t border-zinc-900 py-8 mt-auto">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <p className="text-xs text-zinc-600 leading-relaxed">
+            "Disclaimer: The information and insights provided by this AI model are for informational purposes only and do not constitute financial advice, legal advice, or professional consultation. Users should conduct their own due diligence and consult with qualified professionals before making any business or financial decisions."
+          </p>
+          <p className="text-xs text-zinc-700 mt-3 font-medium">
+            &copy; {new Date().getFullYear()} StratGen AI. Powered by Visionary_Coders
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+export default App;
